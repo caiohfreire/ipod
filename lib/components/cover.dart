@@ -1,18 +1,92 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 
+import 'package:ipod/service/spotify_service.dart';
 import 'package:ipod/utils/media_query.utils.dart';
 
 class Cover extends StatefulWidget {
-  const Cover({super.key});
+  final String accessToken;
+  const Cover({super.key, required this.accessToken});
 
   @override
   State<Cover> createState() => _CoverState();
 }
 
 class _CoverState extends State<Cover> {
-  String imageUrl =
-      "https://i.scdn.co/image/ab67616d0000b273bbd45c8d36e0e045ef640411";
+  late String imageUrl = '';
+  late String songName = '';
+  late String artistName = '';
+  Duration currentProgress = Duration.zero;
+  Duration totalDuration = Duration.zero;
+
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateTrackInfo();
+    _startTrackUpdateTimer();
+  }
+
+  void _startTrackUpdateTimer() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      _updateTrackInfo();
+    });
+  }
+
+  void _updateTrackInfo() async {
+    try {
+      final spotifyService = SpotifyService(accessToken: widget.accessToken);
+      final trackInfo = await spotifyService.getCurrentPlayingTrack();
+
+      if (trackInfo != null && trackInfo['item'] != null) {
+        final item = trackInfo['item'];
+
+        final album = item['album'];
+        if (album != null &&
+            album['images'] != null &&
+            album['images'].isNotEmpty) {
+          setState(() {
+            imageUrl = album['images'][0]['url'] ?? '';
+          });
+        } else {
+          setState(() {
+            imageUrl = '';
+          });
+        }
+
+        setState(() {
+          songName = item['name'] ?? '';
+          artistName =
+              item['artists'] != null && item['artists'].isNotEmpty
+                  ? item['artists'][0]['name'] ?? ''
+                  : '';
+          totalDuration = Duration(milliseconds: item['duration_ms'] ?? 0);
+        });
+      } else {
+        print("No track is currently playing.");
+      }
+
+      final progressInfo = await spotifyService.getTrackProgress();
+      if (progressInfo != null) {
+        setState(() {
+          currentProgress = Duration(
+            milliseconds: progressInfo['progress_ms'] ?? 0,
+          );
+        });
+      }
+    } catch (e) {
+      print("Error fetching track info: $e");
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,18 +97,24 @@ class _CoverState extends State<Cover> {
         fit: StackFit.expand,
         children: [
           ClipRRect(
-            child: Image.network(imageUrl, fit: BoxFit.cover),
             borderRadius: BorderRadius.only(
               bottomLeft: Radius.circular(24),
               bottomRight: Radius.circular(24),
             ),
+            child:
+                imageUrl != ''
+                    ? Image.network(imageUrl, fit: BoxFit.cover)
+                    : Image.asset(
+                      'assets/images/missing_cover.png',
+                      fit: BoxFit.cover,
+                    ),
           ),
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
             child: Container(
-              height: 90,
+              height: 120,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -49,10 +129,10 @@ class _CoverState extends State<Cover> {
             bottom: 82,
             left: 20,
             child: Text(
-              "DtMF",
+              songName,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 28,
+                fontSize: 24,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -61,7 +141,7 @@ class _CoverState extends State<Cover> {
             bottom: 65,
             left: 20,
             child: Text(
-              "Bad Bunny",
+              artistName,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 6),
                 fontSize: 16,
@@ -75,8 +155,8 @@ class _CoverState extends State<Cover> {
             right: 20,
             child: ProgressBar(
               progressBarColor: Colors.white,
-              progress: Duration(minutes: 2),
-              total: Duration(minutes: 4),
+              progress: currentProgress,
+              total: totalDuration,
               thumbColor: Colors.white,
               thumbGlowColor: Colors.transparent,
               baseBarColor: Colors.white70.withAlpha(60),

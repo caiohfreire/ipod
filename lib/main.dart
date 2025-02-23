@@ -24,11 +24,11 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  bool _isAuthenticated = false;
+  String? _accessToken;
 
-  void _onLoginSuccess() {
+  void _onLoginSuccess(String accessToken) {
     setState(() {
-      _isAuthenticated = true;
+      _accessToken = accessToken;
     });
   }
 
@@ -38,8 +38,8 @@ class _MainPageState extends State<MainPage> {
       backgroundColor: Colors.black,
       body: Center(
         child:
-            _isAuthenticated
-                ? HomeScreen() // Exibe a HomeScreen após autenticar
+            _accessToken != null
+                ? HomeScreen(accessToken: _accessToken!)
                 : SpotifyLoginScreen(onLoginSuccess: _onLoginSuccess),
       ),
     );
