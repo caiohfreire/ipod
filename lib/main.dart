@@ -1,33 +1,47 @@
 import 'package:flutter/material.dart';
-import 'package:ipod/components/cover.dart';
-import 'package:ipod/components/player_control.dart';
+
+import 'package:ipod/screens/home.dart';
+import 'package:ipod/screens/spotify_login.dart';
 
 void main() {
-  runApp(const Home());
+  runApp(const Main());
 }
 
-class Home extends StatelessWidget {
-  const Home({super.key});
+class Main extends StatelessWidget {
+  const Main({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: HomePage());
+    return MaterialApp(home: MainPage());
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class MainPage extends StatefulWidget {
+  const MainPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<MainPage> createState() => _MainPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _MainPageState extends State<MainPage> {
+  bool _isAuthenticated = false;
+
+  void _onLoginSuccess() {
+    setState(() {
+      _isAuthenticated = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Column(children: [Cover(), Spacer(), PlayerControl()]),
+      body: Center(
+        child:
+            _isAuthenticated
+                ? HomeScreen() // Exibe a HomeScreen após autenticar
+                : SpotifyLoginScreen(onLoginSuccess: _onLoginSuccess),
+      ),
     );
   }
 }
