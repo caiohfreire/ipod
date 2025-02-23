@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:ionicons/ionicons.dart';
+
 import 'package:ipod/utils/media_query.utils.dart';
 
 class PlayerControl extends StatefulWidget {
@@ -38,7 +40,6 @@ class _PlayerControlState extends State<PlayerControl> {
               ],
             ),
           ),
-
           Positioned(
             bottom: 45,
             child: Container(
@@ -54,6 +55,76 @@ class _PlayerControlState extends State<PlayerControl> {
                     spreadRadius: 2,
                   ),
                 ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 140,
+            child: Container(
+              width: fullWidth(context, percentage: 0.3),
+              height: fullWidth(context, percentage: 0.3),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.grey[300]!, Colors.grey[400]!],
+                  begin: Alignment.center,
+                  end: Alignment.bottomCenter,
+                ),
+                color: Colors.grey[300],
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+
+          // Botão Shuffle
+          Positioned(
+            top: fullHeight(context, percentage: 0.08),
+            child: GestureDetector(
+              onTap: () {
+                print('Play/Pause');
+              },
+              child: Icon(Ionicons.shuffle, size: 35, color: Colors.grey[500]),
+            ),
+          ),
+
+          // Botão Play/Pause
+          Positioned(
+            top: fullHeight(context, percentage: 0.33),
+            child: GestureDetector(
+              onTap: () {
+                print('Play/Pause');
+              },
+              child: Icon(Ionicons.pause, size: 30, color: Colors.grey[500]),
+            ),
+          ),
+
+          // Botão Anterior
+          Positioned(
+            left: fullWidth(context, percentage: 0.2),
+            top: fullHeight(context, percentage: 0.2),
+            child: GestureDetector(
+              onTap: () {
+                print('Anterior');
+              },
+              child: Icon(
+                Ionicons.play_back,
+                size: 30,
+                color: Colors.grey[500],
+              ),
+            ),
+          ),
+
+          // Botão Próximo
+          Positioned(
+            right: fullWidth(context, percentage: 0.2),
+            top: fullHeight(context, percentage: 0.2),
+            child: GestureDetector(
+              onTap: () {
+                print('Próximo');
+              },
+              child: Icon(
+                Ionicons.play_forward,
+                size: 30,
+                color: Colors.grey[500],
               ),
             ),
           ),
