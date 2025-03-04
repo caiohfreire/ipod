@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:ipod/service/auth_service.dart';
 import 'package:ipod/components/cover.dart';
 import 'package:ipod/components/player_control.dart';
 
@@ -13,12 +12,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String? _accessToken;
+  late String _accessToken;
 
   @override
   void initState() {
     super.initState();
-    _accessToken = widget.accessToken;
+    _accessToken =
+        widget.accessToken; // Atribui o valor do token passado via construtor
   }
 
   @override
@@ -27,14 +27,20 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.black,
       body: Center(
         child:
-            _accessToken == null
-                ? CircularProgressIndicator(color: Colors.green)
+            _accessToken.isEmpty
+                ? CircularProgressIndicator(
+                  color: Colors.green,
+                ) // Aguarda o carregamento
                 : Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    Cover(accessToken: _accessToken!),
+                    Cover(
+                      accessToken: _accessToken,
+                    ), // Passa o accessToken para o Cover
                     Spacer(),
-                    PlayerControl(),
+                    PlayerControl(
+                      accessToken: _accessToken,
+                    ), // Passa o accessToken para o PlayerControl
                   ],
                 ),
       ),

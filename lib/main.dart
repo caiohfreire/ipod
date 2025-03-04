@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:ipod/screens/home.dart';
 import 'package:ipod/screens/spotify_login.dart';
+import 'package:ipod/service/auth_storage.dart';
 
 void main() {
   runApp(const Main());
@@ -25,6 +26,22 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   String? _accessToken;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAccessToken();
+  }
+
+  // Carrega o accessToken do armazenamento seguro
+  Future<void> _loadAccessToken() async {
+    final token = await AuthStorage.getAccessToken();
+    if (token != null) {
+      setState(() {
+        _accessToken = token;
+      });
+    }
+  }
 
   void _onLoginSuccess(String accessToken) {
     setState(() {

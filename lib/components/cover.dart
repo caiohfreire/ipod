@@ -1,8 +1,7 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
-
+import 'package:ipod/service/auth_service.dart';
 import 'package:ipod/service/spotify_service.dart';
 import 'package:ipod/utils/media_query.utils.dart';
 
@@ -11,10 +10,13 @@ class Cover extends StatefulWidget {
   const Cover({super.key, required this.accessToken});
 
   @override
-  State<Cover> createState() => _CoverState();
+  _CoverState createState() => _CoverState();
 }
 
 class _CoverState extends State<Cover> {
+  late SpotifyAuthService spotifyAuthService;
+  late SpotifyService spotifyService;
+
   late String imageUrl = '';
   late String songName = '';
   late String artistName = '';
@@ -26,24 +28,35 @@ class _CoverState extends State<Cover> {
   @override
   void initState() {
     super.initState();
+
+    // Inicializa o SpotifyAuthService e o SpotifyService corretamente
+    spotifyAuthService = SpotifyAuthService(
+      accessToken: widget.accessToken,
+      refreshToken: '', // Se necessário, passe também o refresh token
+    );
+
+    spotifyService = SpotifyService(spotifyAuthService: spotifyAuthService);
+
     _updateTrackInfo();
     _startTrackUpdateTimer();
   }
 
+  // Atualiza as informações da música
   void _startTrackUpdateTimer() {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       _updateTrackInfo();
     });
   }
 
+  // Função para atualizar as informações do track
   void _updateTrackInfo() async {
     try {
-      final spotifyService = SpotifyService(accessToken: widget.accessToken);
       final trackInfo = await spotifyService.getCurrentPlayingTrack();
 
       if (trackInfo != null && trackInfo['item'] != null) {
         final item = trackInfo['item'];
 
+        // Verifica se a capa do álbum existe
         final album = item['album'];
         if (album != null &&
             album['images'] != null &&
@@ -60,15 +73,17 @@ class _CoverState extends State<Cover> {
         setState(() {
           songName = item['name'] ?? '';
           artistName =
-              item['artists'] != null && item['artists'].isNotEmpty
-                  ? item['artists'][0]['name'] ?? ''
-                  : '';
+              (item['artists'] as List)
+                  .map((artist) => artist['name'])
+                  .join(', ') ??
+              '';
           totalDuration = Duration(milliseconds: item['duration_ms'] ?? 0);
         });
       } else {
         print("No track is currently playing.");
       }
 
+      // Atualiza o progresso da música
       final progressInfo = await spotifyService.getTrackProgress();
       if (progressInfo != null) {
         setState(() {
@@ -84,7 +99,7 @@ class _CoverState extends State<Cover> {
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _timer?.cancel(); // Cancela o timer quando o widget for removido da árvore
     super.dispose();
   }
 
@@ -143,7 +158,9 @@ class _CoverState extends State<Cover> {
             child: Text(
               artistName,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 6),
+                color: Colors.white.withAlpha(
+                  160,
+                ), // Alterado para mais opacidade
                 fontSize: 16,
                 fontWeight: FontWeight.w400,
               ),

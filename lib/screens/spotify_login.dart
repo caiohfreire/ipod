@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:ipod/screens/home.dart';
-import 'package:ipod/utils/media_query.utils.dart';
 import 'package:lottie/lottie.dart';
 
+import 'package:ipod/service/auth_storage.dart';
+
+import 'package:ipod/utils/media_query.utils.dart';
 import 'package:ipod/service/auth_service.dart';
 
 class SpotifyLoginScreen extends StatefulWidget {
@@ -17,7 +18,14 @@ class _SpotifyLoginScreenState extends State<SpotifyLoginScreen> {
   String? _accessToken;
 
   Future<void> _loginToSpotify() async {
-    final authService = SpotifyAuthService();
+    String refreshToken = await AuthStorage.getRefreshToken() ?? '';
+    String accessToken = await AuthStorage.getAccessToken() ?? '';
+
+    final authService = SpotifyAuthService(
+      refreshToken: refreshToken,
+      accessToken: accessToken,
+    );
+
     final token = await authService.authenticate();
 
     if (token != null) {
@@ -31,42 +39,35 @@ class _SpotifyLoginScreenState extends State<SpotifyLoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Center(
-        child: SafeArea(
-          child: Column(
-            children: [
-              SizedBox(height: 24),
-              Padding(
-                padding: EdgeInsets.all(24),
-                child: Column(
-                  spacing: 12,
-                  children: [
-                    Text(
-                      "iPodfy",
-                      style: TextStyle(
-                        color: Colors.grey[200],
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      "A new way to listen to music the old-school way.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.grey[300],
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "iPodfy",
+                  style: TextStyle(
+                    color: Colors.grey[200],
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              Spacer(),
-              Lottie.asset('assets/lottie/spotify_animation.json'),
-              Spacer(),
-              Padding(
-                padding: EdgeInsets.all(24),
-                child: ElevatedButton(
+                SizedBox(height: 8),
+                Text(
+                  "A new way to listen to music the old-school way.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.grey[300],
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: 40),
+                Lottie.asset('assets/lottie/spotify_animation.json'),
+                SizedBox(height: 40),
+                ElevatedButton(
                   onPressed: _loginToSpotify,
                   child: Text("Connect to your Spotify account"),
                   style: ElevatedButton.styleFrom(
@@ -82,9 +83,8 @@ class _SpotifyLoginScreenState extends State<SpotifyLoginScreen> {
                     ),
                   ),
                 ),
-              ),
-              Spacer(),
-            ],
+              ],
+            ),
           ),
         ),
       ),
