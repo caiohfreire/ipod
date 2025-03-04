@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:ipod/service/auth_service.dart';
 
+import 'package:ipod/service/auth_service.dart';
 import 'package:ipod/service/auth_storage.dart';
 import 'package:ipod/service/spotify_service.dart';
 import 'package:ipod/utils/media_query.utils.dart';
@@ -155,6 +156,7 @@ class _PlayerControlState extends State<PlayerControl> {
             top: fullHeight(context, percentage: 0.08),
             child: GestureDetector(
               onTap: () async {
+                HapticFeedback.mediumImpact();
                 await spotifyService?.shuffleMode(!isShuffleMode);
                 setState(() {
                   isShuffleMode = !isShuffleMode;
@@ -173,6 +175,7 @@ class _PlayerControlState extends State<PlayerControl> {
             top: fullHeight(context, percentage: 0.33),
             child: GestureDetector(
               onTap: () async {
+                HapticFeedback.mediumImpact();
                 final currentTrack =
                     await spotifyService?.getCurrentPlayingTrack();
 
@@ -204,6 +207,7 @@ class _PlayerControlState extends State<PlayerControl> {
             top: fullHeight(context, percentage: 0.2),
             child: GestureDetector(
               onTap: () {
+                HapticFeedback.mediumImpact();
                 spotifyService?.previousTrack();
                 print('Anterior');
               },
@@ -221,6 +225,7 @@ class _PlayerControlState extends State<PlayerControl> {
             top: fullHeight(context, percentage: 0.2),
             child: GestureDetector(
               onTap: () {
+                HapticFeedback.heavyImpact();
                 spotifyService?.nextTrack();
                 print('Próximo');
               },
